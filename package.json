@@ -1,0 +1,26 @@
+{
+  "name": "brisjs-data-analysis-talk",
+  "version": "1.0.0",
+  "description": "Code for my talk to BrisJS in 2018",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashleydavis/brisjs-data-analysis-talk.git"
+  },
+  "keywords": [],
+  "author": "ashley@codecapers.com.au",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ashleydavis/brisjs-data-analysis-talk/issues"
+  },
+  "homepage": "https://github.com/ashleydavis/brisjs-data-analysis-talk#readme",
+  "dependencies": {
+    "data-forge": "^1.2.3",
+    "data-forge-indicators": "^0.1.7",
+    "data-forge-plot": "0.0.27",
+    "moment": "^2.22.2"
+  }
+}
