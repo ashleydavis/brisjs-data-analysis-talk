@@ -134,7 +134,11 @@ async function main () {
         .inflate();
     console.log(weightGroupedByMonth.toString());
 
-    await weightGroupedByMonth.plot().chartType(ChartType.Bar).renderImage("./output/monthly-weight-loss-group-and-summarize.png");
+    await weightGroupedByMonth.plot()
+        .chartType(ChartType.Bar)
+        .x("Month")
+        .y("WeightChange")
+        .renderImage("./output/monthly-weight-loss-group-and-summarize.png");
 
     //======================-======================-======================-======================-
     // Daily % change. Worst day for weight loss.
