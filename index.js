@@ -41,6 +41,12 @@ async function main () {
     // 4a.
     await df.plot({}, { y: "Weight" }).renderImage("./output/complete-chart-1.png");
 
+    // 4b.
+    await df.plot({}, { y: "Weight" }).exportWeb("./output/web-export-1");
+
+    // 4c.
+    await df.plot({}, { y: "Weight" }).exportNodejs("./output/nodejs-export-1");
+    
     //======================-======================-======================-======================-
     // Using a moving average to eliminate the noise and better see the trend.
     //======================-======================-======================-======================-
@@ -162,7 +168,7 @@ async function main () {
             Day: moment(group.first().Date).format('dddd'),
             AmountChange: group.getSeries("AmountChange")
                 .where(value => typeof(value) === "number") //fio:
-                .sum()
+                .average()
         }))
         .inflate()
         .orderBy(row => row.DayIndex)
@@ -181,16 +187,16 @@ async function main () {
                 y: "AmountChange" 
             }
         )
-        .renderImage("./days-of-week.png");
+        .renderImage("./output/days-of-week.png");
 
     // 12. 
 
-    await mergedDf.plot({}, { x: "Date", y: [ "Weight", "Average" ] }).exportWeb("./output/web-export", { overwrite: true });
+    await mergedDf.plot({}, { x: "Date", y: [ "Weight", "Average" ] }).exportWeb("./output/web-export-2", { overwrite: true });
     
 
     // 13. 
     
-    await mergedDf.plot({}, { x: "Date", y: [ "Weight", "Average" ] }).exportNodejs("./output/nodejs-export", { overwrite: true });
+    await mergedDf.plot({}, { x: "Date", y: [ "Weight", "Average" ] }).exportNodejs("./output/nodejs-export-2", { overwrite: true });
 }
 
 main()
