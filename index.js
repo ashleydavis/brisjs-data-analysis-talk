@@ -60,7 +60,7 @@ async function main () {
 
     // 6.
     const mergedDf = df.withSeries("Average", averageWeight).skip(30);
-    await mergedDf.plot({}, { x: "Date", y: "Weight" }).renderImage("./output/complete-chart-2.png");
+    await mergedDf.plot({}, { x: "Date", y: ["Weight", "Average"] }).renderImage("./output/complete-chart-2.png");
 
     //======================-======================-======================-======================-
     // What is my total weight loss?
@@ -167,12 +167,11 @@ async function main () {
             DayIndex: moment(group.first().Date).weekday(),
             Day: moment(group.first().Date).format('dddd'),
             AmountChange: group.getSeries("AmountChange")
-                .where(value => typeof(value) === "number") //fio:
+                .where(value => typeof(value) === "number")
                 .average()
         }))
         .inflate()
-        .orderBy(row => row.DayIndex)
-        .bake();
+        .orderBy(row => row.DayIndex);
 
     console.log(daysOfWeek.toString());
     console.log(daysOfWeek.detectTypes().toString());
