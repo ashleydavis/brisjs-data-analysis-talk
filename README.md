@@ -8,6 +8,12 @@ To learn more about working with data in JavaScript please read my book [Data Wr
 
 Do your prototyping and exploratory data analysis in JavaScript with [Data-Forge Notebook](http://www.data-forge-notebook.com/).
 
+## The slides for this talk
+
+The slides for this talk are [available on Slideshare](https://www.slideshare.net/AshleyDavis33/data-analysis-in-javascript).
+
+Please check this repo again in the future, once the video of my talk becomes available I'll post it as well.
+
 ## Getting started with this repo
 
 If you have git installed on your workstation you can open a command line and clone this repo as follows:
