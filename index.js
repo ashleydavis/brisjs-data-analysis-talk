@@ -1,6 +1,3 @@
-
-
-// 1.
 const dataForge = require('data-forge');
 require('data-forge-indicators');
 require('data-forge-plot');
@@ -8,73 +5,92 @@ const moment = require('moment');
 const ChartType = require('data-forge-plot').ChartType;
 const AxisType = require('data-forge-plot/build/chart-def').AxisType;
 
-/*
-STUB:
-
-async function main () {
-    console.log("Hello data analysis in JavaScript");
-}
-
-main()
-    .then(() => console.log("Done"))
-    .catch(err => console.error(err && err.stack || err));
-*/
-
 async function main () {
 
     //======================-======================-======================-======================-
     // Load, parse and preview the data set.
     //======================-======================-======================-======================-
 
-    // 2.
     let df = await dataForge.readFile("./data/Measurement-Summary-2017-12-31-to-2018-07-04.csv").parseCSV();
-    df = df.parseDates("Date")
-        .parseFloats("Weight")
-        .setIndex("Date");
+    df = df.parseDates("Date")  // Parse the Date column.
+        .parseFloats("Weight")  // Parse the Weight column.
+        .setIndex("Date");      // Index on the Date column, for later merging data in.
 
-    // 3.
-    console.log(df.head(10).toString());
+    console.log(df.head(10).toString()); // Preview the data, check that it was loaded and parsed ok.
 
-    // 4.
-    await df.plot().renderImage("./output/complete-chart-1.png");
+    await df.plot().renderImage("./output/complete-chart-1.png"); // Render first chart.
 
-    // 4a.
-    await df.plot({}, { y: "Weight" }).renderImage("./output/complete-chart-1.png");
+    await df.plot({}, { y: "Weight" }).renderImage("./output/complete-chart-2.png"); // Make the chart look ok visually, render again.
 
-    // 4b.
-    await df.plot({}, { y: "Weight" }).exportWeb("./output/web-export-1");
+    await df.plot({}, { y: "Weight" }).exportWeb("./output/web-export-1"); // Export an interactive web viz.
 
-    // 4c.
-    await df.plot({}, { y: "Weight" }).exportNodejs("./output/nodejs-export-1");
+    await df.plot({}, { y: "Weight" }).exportNodejs("./output/nodejs-export-1"); // Export a Node.js project.
+
+    //======================-======================-======================-======================-
+    // What are the best and worst days of the week for weight gain/loss?
+    //======================-======================-======================-======================-
     
+    const weight = df.getSeries("Weight");              // Extract the weight column.
+    const amountChange = weight.amountChange(2);        // Compute the amount of day-to-day weight loss/gain.
+    df = df.withSeries("AmountChange", amountChange);   // Merge computed data back into our data set.
+
+    const daysOfWeek = df
+        .groupBy(row => moment(row.Date).format('dddd'))        // Group the data set by day of week.
+        .select(group => ({                                     // Transform each group to a summary of the group.
+            DayIndex: moment(group.first().Date).weekday(), 
+            Day: moment(group.first().Date).format('dddd'),
+            AmountChange: group.getSeries("AmountChange")       // Average amount of weight change for the particular day.
+                .where(value => typeof(value) === "number")
+                .average()
+        }))
+        .inflate()
+        .orderBy(row => row.DayIndex);                          // Make sure the data is sorted in the right order for display in the chart.
+
+    console.log(daysOfWeek.toString()); // Preview our data before we produce the chart.
+    console.log(daysOfWeek.detectTypes().toString());
+    console.log(daysOfWeek.detectValues().toString());
+
+    await daysOfWeek.plot(
+            { 
+                chartType: ChartType.Bar,   // Plot a bar chart.
+            }, 
+            { 
+                x: "Day",                   // Assign the Day column to the chart's X axis.
+                y: "AmountChange"           // Assign the AmountChange column to the Y axis.
+            }
+        )
+        .renderImage("./output/days-of-week.png");
+
+    //======================-======================-======================-======================-
+    // Understand the daily change as a percentage.
+    //======================-======================-======================-======================-
+    
+    const dailyChange = weight.percentChange(2); // Look at day-to-day percentage change.
+    console.log(dailyChange.head(10).toString());
+    await dailyChange.plot({ chartType: ChartType.Bar }).renderImage("./output/daily-change-bar.png");
+    
+
     //======================-======================-======================-======================-
     // Using a moving average to eliminate the noise and better see the trend.
     //======================-======================-======================-======================-
 
-    // 5.
-    const weight = df.getSeries("Weight");
-    const averageWeight = weight.sma(30);
+    const averageWeight = weight.sma(30); // Produce a 30-day simple moving average (sma) - also known as a rolling average.
 
     console.log(averageWeight.head(10).toString());
     await averageWeight.plot().renderImage("./output/thirty-day-average.png");
 
-    // 6.
-    const mergedDf = df.withSeries("Average", averageWeight).skip(30);
-    await mergedDf.plot({}, { x: "Date", y: ["Weight", "Average"] }).renderImage("./output/complete-chart-2.png");
+    const mergedDf = df.withSeries("Average", averageWeight).skip(30); // Merge the SMA into our data set.
+    await mergedDf.plot({}, { x: "Date", y: ["Weight", "Average"] }).renderImage("./output/complete-chart-3.png"); // Render merged series.
 
     //======================-======================-======================-======================-
     // What is my total weight loss?
     //======================-======================-======================-======================-
-
-    // 7a.
 
     const totalWeightLoss = weight.first() - weight.last();
     console.log("Total Weight Loss");
     console.log("Kgs: " + totalWeightLoss);
     console.log("%:   " + (totalWeightLoss / weight.first()) * 100);
     console.log();
-
-    // 7b.
 
     console.log("Time period: ");
     const numDays = moment(weight.getIndex().last()).diff(weight.getIndex().first(), 'days');
@@ -85,18 +101,14 @@ async function main () {
     // What is my average daily weight loss?
     //======================-======================-======================-======================-
 
-    // 8.
-
     console.log("Average daily weight loss: " + (totalWeightLoss / numDays) + " kgs.");
     console.log("Average weekly weight loss: " + (totalWeightLoss / (numDays / 7)) + " kgs.");
 
     //======================-======================-======================-======================-
-    // The actual weight loss changes. Which were the best days and weeks?
+    // Which were the best days and weeks for weight loss?
     //======================-======================-======================-======================-
 
-    // 9.
-
-    const weightByWeek = weight.window(7)
+    const weightByWeek = weight.window(7) // Analyse the data in 7-day windows.
         .select(window => {
             return [
                 window.getIndex().last(),
@@ -106,15 +118,9 @@ async function main () {
         .withIndex(pair => pair[0])
         .select(pair => pair[1]);
     console.log(weightByWeek.head(10).toString());
-    await weightByWeek.plot().renderImage("./output/weekly-weight-loss-line.png");
-
-    // 9a.
-    
     await weightByWeek.plot({ chartType: ChartType.Bar }).renderImage("./output/weekly-weight-loss-bar.png");
 
-    // 9b.
-
-    const weightByMonth = weight.window(30)
+    const weightByMonth = weight.window(30) // Analyse the data in 30-day windows.
         .select(window => {
             return [
                 window.getIndex().last(),
@@ -130,10 +136,8 @@ async function main () {
     // Group and summarize. Another way to group by month.
     //======================-======================-======================-======================-
 
-    // 10.
-
-    const weightGroupedByMonth = df.groupBy(row => moment(row.Date).month())
-        .select(monthGroup => ({
+    const weightGroupedByMonth = df.groupBy(row => moment(row.Date).month()) // Group the data by month.
+        .select(monthGroup => ({ // Transform each group to a summary of the weight change per month.
             Month: moment(monthGroup.getIndex().first()).format("MMMM"),
             WeightChange: monthGroup.last().Weight - monthGroup.first().Weight,
         }))
@@ -141,61 +145,10 @@ async function main () {
     console.log(weightGroupedByMonth.toString());
 
     await weightGroupedByMonth.plot()
-        .chartType(ChartType.Bar)
+        .chartType(ChartType.Bar) // This is an example of the Data-Forge Plot fluent API.
         .x("Month")
         .y("WeightChange")
         .renderImage("./output/monthly-weight-loss-group-and-summarize.png");
-
-    //======================-======================-======================-======================-
-    // Daily % change. Worst day for weight loss.
-    //======================-======================-======================-======================-
-    
-    // 11.
-
-    const dailyChange = weight.percentChange(2);
-    console.log(dailyChange.head(10).toString());
-
-    await dailyChange.plot({ chartType: ChartType.Bar }).renderImage("./output/daily-change-bar.png");
-
-    // 11b.
-    
-    df = df.withSeries("AmountChange", weight.amountChange(2));
-
-    const daysOfWeek = df
-        .groupBy(row => moment(row.Date).format('dddd'))
-        .select(group => ({
-            DayIndex: moment(group.first().Date).weekday(),
-            Day: moment(group.first().Date).format('dddd'),
-            AmountChange: group.getSeries("AmountChange")
-                .where(value => typeof(value) === "number")
-                .average()
-        }))
-        .inflate()
-        .orderBy(row => row.DayIndex);
-
-    console.log(daysOfWeek.toString());
-    console.log(daysOfWeek.detectTypes().toString());
-    console.log(daysOfWeek.detectValues().toString());
-
-    await daysOfWeek.plot(
-            { 
-                chartType: ChartType.Bar, 
-            }, 
-            { 
-                x: "Day", 
-                y: "AmountChange" 
-            }
-        )
-        .renderImage("./output/days-of-week.png");
-
-    // 12. 
-
-    await mergedDf.plot({}, { x: "Date", y: [ "Weight", "Average" ] }).exportWeb("./output/web-export-2", { overwrite: true });
-    
-
-    // 13. 
-    
-    await mergedDf.plot({}, { x: "Date", y: [ "Weight", "Average" ] }).exportNodejs("./output/nodejs-export-2", { overwrite: true });
 }
 
 main()
