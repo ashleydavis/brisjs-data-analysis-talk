@@ -8,6 +8,8 @@ To learn more about working with data in JavaScript please read my book [Data Wr
 
 Do your prototyping and exploratory data analysis in JavaScript with [Data-Forge Notebook](http://www.data-forge-notebook.com/).
 
+[Click here to support my work](https://www.codecapers.com.au/about#support-my-work)
+
 ## The slides for this talk
 
 The slides for this talk are [available on Slideshare](https://www.slideshare.net/AshleyDavis33/data-analysis-in-javascript).
